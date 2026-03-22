@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns:models="clr-namespace:MauiAppMinhasCompras.Models"
+    x:Class="MauiAppMinhasCompras.Views.ListaProduto"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Lista de Produtos">
+
+    <!-- BOTÃO + -->
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="+" Clicked="OnAdd"/>
+    </ContentPage.ToolbarItems>
+
+    <StackLayout>
+
+        <ListView 
+            x:Name="lista_produtos"
+            ItemSelected="OnItemSelected"
+            HasUnevenRows="True">
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:Produto">
+                    <ViewCell>
+
+                        <ViewCell.ContextActions>
+                            <MenuItem 
+                    Text="Excluir"
+                    Clicked="OnDelete"
+                    IsDestructive="True"/>
+                        </ViewCell.ContextActions>
+
+                        <StackLayout Padding="10" Spacing="5">
+                            <Label 
+                    Text="{Binding Descricao}" 
+                    FontSize="18"
+                    FontAttributes="Bold" />
+
+                            <Label Text="{Binding Quantidade, StringFormat='Quantidade: {0}'}" />
+                            <Label Text="{Binding Preco, StringFormat='Preço: R$ {0:F2}'}" />
+                        </StackLayout>
+
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+    </StackLayout>
+
+</ContentPage>

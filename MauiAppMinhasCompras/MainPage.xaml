@@ -1,0 +1,26 @@
+﻿<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MauiAppMinhasCompras.MainPage">
+
+    <VerticalStackLayout Padding="10">
+
+        <SearchBar
+            Placeholder="Digite para buscar produto"
+            TextChanged="OnSearchTextChanged"/>
+
+        <ListView x:Name="ListaProdutos">
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell
+                        Text="{Binding Descricao}"
+                        Detail="{Binding Preco}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+    </VerticalStackLayout>
+
+</ContentPage>
