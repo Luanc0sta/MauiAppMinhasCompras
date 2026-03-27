@@ -6,13 +6,25 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Lista de Produtos">
 
-    <!-- BOTÃO + -->
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="+" Clicked="OnAdd"/>
     </ContentPage.ToolbarItems>
 
-    <StackLayout>
+    <StackLayout Padding="10" Spacing="10">
 
+        <!-- FILTRO -->
+        <Picker x:Name="pickerCategoria"
+                Title="Filtrar por categoria"
+                SelectedIndexChanged="OnCategoriaSelecionada">
+            <Picker.Items>
+                <x:String>Todos</x:String>
+                <x:String>Alimentos</x:String>
+                <x:String>Higiene</x:String>
+                <x:String>Limpeza</x:String>
+            </Picker.Items>
+        </Picker>
+
+        <!-- LISTA -->
         <ListView 
             x:Name="lista_produtos"
             ItemSelected="OnItemSelected"
@@ -24,19 +36,24 @@
 
                         <ViewCell.ContextActions>
                             <MenuItem 
-                    Text="Excluir"
-                    Clicked="OnDelete"
-                    IsDestructive="True"/>
+                                Text="Excluir"
+                                Clicked="OnDelete"
+                                IsDestructive="True"/>
                         </ViewCell.ContextActions>
 
                         <StackLayout Padding="10" Spacing="5">
-                            <Label 
-                    Text="{Binding Descricao}" 
-                    FontSize="18"
-                    FontAttributes="Bold" />
+
+                            <Label Text="{Binding Descricao}" 
+                                   FontSize="18"
+                                   FontAttributes="Bold" />
 
                             <Label Text="{Binding Quantidade, StringFormat='Quantidade: {0}'}" />
+
                             <Label Text="{Binding Preco, StringFormat='Preço: R$ {0:F2}'}" />
+
+                            <Label Text="{Binding Categoria, StringFormat='Categoria: {0}'}"
+                                   TextColor="Gray"/>
+
                         </StackLayout>
 
                     </ViewCell>
@@ -44,6 +61,9 @@
             </ListView.ItemTemplate>
 
         </ListView>
+
+        <Button Text="Relatório por Categoria"
+                Clicked="OnRelatorioCategoria"/>
 
     </StackLayout>
 

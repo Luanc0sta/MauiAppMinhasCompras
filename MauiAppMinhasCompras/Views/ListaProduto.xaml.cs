@@ -1,19 +1,29 @@
 using MauiAppMinhasCompras.Models;
+using System.Collections.ObjectModel;
 
 namespace MauiAppMinhasCompras.Views;
 
 public partial class ListaProduto : ContentPage
 {
+    ObservableCollection<Produto> lista = new ObservableCollection<Produto>();
+
     public ListaProduto()
     {
         InitializeComponent();
+        lista_produtos.ItemsSource = lista;
     }
 
     protected override async void OnAppearing()
     {
+        base.OnAppearing();
+
         try
         {
-            lista_produtos.ItemsSource = await App.Db.GetAll();
+            lista.Clear();
+
+            var produtos = await App.Db.GetAll();
+
+            produtos.ForEach(p => lista.Add(p));
         }
         catch (Exception ex)
         {
@@ -27,25 +37,16 @@ public partial class ListaProduto : ContentPage
         await Navigation.PushAsync(new NovoProduto());
     }
 
-    // EXCLUIR
-    private async void OnDelete(object sender, EventArgs e)
+    // EDITAR AO CLICAR
+    private async void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
     {
         try
         {
-            MenuItem item = sender as MenuItem;
-            Produto produto = item.BindingContext as Produto;
+            Produto p = e.SelectedItem as Produto;
 
-            bool resposta = await DisplayAlert(
-                "Confirmar",
-                "Deseja excluir?",
-                "Sim",
-                "Não"
-            );
-
-            if (resposta)
+            if (p != null)
             {
-                await App.Db.Delete(produto.Id);
-                lista_produtos.ItemsSource = await App.Db.GetAll();
+                await Navigation.PushAsync(new NovoProduto(p));
             }
         }
         catch (Exception ex)
@@ -54,20 +55,85 @@ public partial class ListaProduto : ContentPage
         }
     }
 
-    // EDITAR
-    private async void OnItemSelected(object sender, SelectedItemChangedEventArgs e)
+    // EXCLUIR
+    private async void OnDelete(object sender, EventArgs e)
     {
         try
         {
-            Produto produto = e.SelectedItem as Produto;
+            MenuItem item = sender as MenuItem;
+            Produto produto = item.BindingContext as Produto;
 
-            if (produto != null)
+            bool confirm = await DisplayAlert("Excluir", "Deseja excluir?", "Sim", "Não");
+
+            if (confirm)
             {
-                await Navigation.PushAsync(new EditarProduto
-                {
-                    BindingContext = produto
-                });
+                await App.Db.Delete(produto.Id);
+                lista.Remove(produto);
             }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", ex.Message, "OK");
+        }
+    }
+
+    // FILTRO POR CATEGORIA (CORRIGIDO)
+    private async void OnCategoriaSelecionada(object sender, EventArgs e)
+    {
+        try
+        {
+            if (pickerCategoria.SelectedIndex == -1)
+                return;
+
+            string categoria = pickerCategoria.SelectedItem.ToString();
+
+            lista.Clear();
+
+            var produtos = await App.Db.GetAll();
+
+            if (categoria == "Todos")
+            {
+                produtos.ForEach(p => lista.Add(p));
+            }
+            else
+            {
+                var filtrados = produtos
+                    .Where(p => p.Categoria != null &&
+                                p.Categoria.ToLower() == categoria.ToLower())
+                    .ToList();
+
+                filtrados.ForEach(p => lista.Add(p));
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Erro", ex.Message, "OK");
+        }
+    }
+
+    // RELATÓRIO POR CATEGORIA
+    private async void OnRelatorioCategoria(object sender, EventArgs e)
+    {
+        try
+        {
+            var produtos = await App.Db.GetAll();
+
+            var relatorio = produtos
+                .GroupBy(p => p.Categoria)
+                .Select(g => new
+                {
+                    Categoria = g.Key,
+                    Total = g.Sum(p => p.Total)
+                });
+
+            string msg = "";
+
+            foreach (var item in relatorio)
+            {
+                msg += $"{item.Categoria}: {item.Total:C}\n";
+            }
+
+            await DisplayAlert("Relatório por Categoria", msg, "OK");
         }
         catch (Exception ex)
         {
